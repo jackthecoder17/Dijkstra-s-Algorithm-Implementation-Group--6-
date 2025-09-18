@@ -278,28 +278,78 @@ ROADS = {
 
 def calculate_distance(from_city, to_city):
     """Calculate distance between two cities using Dijkstra's algorithm."""
-    if from_city == to_city:
-        return {"success": True, "distance": 0, "path": [from_city]}
+    # Validate input cities
+    if not from_city or not to_city:
+        return {
+            "success": False, 
+            "error": "Both from_city and to_city are required",
+            "distance": None,
+            "distance_unit": "km",
+            "path": []
+        }
     
-    # Simple distance calculation (in real implementation, use Dijkstra's)
-    if (from_city, to_city) in ROADS:
-        distance = ROADS[(from_city, to_city)]
-        return {"success": True, "distance": distance, "path": [from_city, to_city]}
-    elif (to_city, from_city) in ROADS:
-        distance = ROADS[(to_city, from_city)]
-        return {"success": True, "distance": distance, "path": [from_city, to_city]}
-    else:
-        # Estimate distance using coordinates
-        if from_city in CITIES and to_city in CITIES:
-            from_data = CITIES[from_city]
-            to_data = CITIES[to_city]
-            # Simple Euclidean distance approximation
-            lat_diff = abs(from_data["lat"] - to_data["lat"])
-            lng_diff = abs(from_data["lng"] - to_data["lng"])
-            distance = int((lat_diff + lng_diff) * 100)  # Rough approximation
-            return {"success": True, "distance": distance, "path": [from_city, to_city]}
-        else:
-            return {"success": False, "error": "City not found"}
+    # Check if cities exist
+    if from_city not in CITIES:
+        return {
+            "success": False, 
+            "error": f"City '{from_city}' not found. Available cities: {', '.join(list(CITIES.keys())[:10])}...",
+            "distance": None,
+            "distance_unit": "km",
+            "path": []
+        }
+    
+    if to_city not in CITIES:
+        return {
+            "success": False, 
+            "error": f"City '{to_city}' not found. Available cities: {', '.join(list(CITIES.keys())[:10])}...",
+            "distance": None,
+            "distance_unit": "km",
+            "path": []
+        }
+    
+    # Same city
+    if from_city == to_city:
+        return {
+            "success": True, 
+            "distance": 0, 
+            "distance_unit": "km",
+            "path": [from_city],
+            "from_city": from_city,
+            "to_city": to_city,
+            "route_info": {
+                "total_cities": 1,
+                "direct_route": True,
+                "same_city": True
+            }
+        }
+    
+    # Use Dijkstra's algorithm for optimal path
+    distance, path = dijkstra_algorithm(CITIES, ROADS, from_city, to_city)
+    
+    if distance is None:
+        return {
+            "success": False, 
+            "error": f"No route found between {from_city} and {to_city}",
+            "distance": None,
+            "distance_unit": "km",
+            "path": [],
+            "from_city": from_city,
+            "to_city": to_city
+        }
+    
+    return {
+        "success": True, 
+        "distance": distance, 
+        "distance_unit": "km",
+        "path": path,
+        "from_city": from_city,
+        "to_city": to_city,
+        "route_info": {
+            "total_cities": len(path),
+            "direct_route": len(path) == 2,
+            "total_distance_km": distance
+        }
+    }
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -327,7 +377,29 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             
             cities_list = [{"name": name, "state": data["state"], "is_capital": data["is_capital"]} for name, data in CITIES.items()]
-            response = {"success": True, "cities": cities_list, "count": len(cities_list)}
+            
+            # Calculate statistics
+            capitals = [city for city in cities_list if city["is_capital"]]
+            major_cities = [city for city in cities_list if not city["is_capital"]]
+            states = list(set([city["state"] for city in cities_list]))
+            
+            response = {
+                "success": True, 
+                "cities": cities_list, 
+                "count": len(cities_list),
+                "statistics": {
+                    "total_cities": len(cities_list),
+                    "state_capitals": len(capitals),
+                    "major_cities": len(major_cities),
+                    "total_states": len(states),
+                    "states": sorted(states)
+                },
+                "metadata": {
+                    "description": "All Nigerian cities with state capitals and major cities",
+                    "distance_unit": "km",
+                    "algorithm": "Dijkstra's Algorithm for shortest path calculation"
+                }
+            }
             self.wfile.write(json.dumps(response).encode())
             
         elif self.path == '/docs':
@@ -439,11 +511,30 @@ class handler(BaseHTTPRequestHandler):
                                                             "type": "object",
                                                             "properties": {
                                                                 "name": {"type": "string"},
-                                                                "state": {"type": "string"}
+                                                                "state": {"type": "string"},
+                                                                "is_capital": {"type": "boolean"}
                                                             }
                                                         }
                                                     },
-                                                    "count": {"type": "integer"}
+                                                    "count": {"type": "integer"},
+                                                    "statistics": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "total_cities": {"type": "integer"},
+                                                            "state_capitals": {"type": "integer"},
+                                                            "major_cities": {"type": "integer"},
+                                                            "total_states": {"type": "integer"},
+                                                            "states": {"type": "array", "items": {"type": "string"}}
+                                                        }
+                                                    },
+                                                    "metadata": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "description": {"type": "string"},
+                                                            "distance_unit": {"type": "string"},
+                                                            "algorithm": {"type": "string"}
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
