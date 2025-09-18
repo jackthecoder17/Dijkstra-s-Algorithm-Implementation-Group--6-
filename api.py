@@ -68,7 +68,7 @@ CITIES = {
 # Comprehensive road connections between all 36 state capitals
 ROADS = {
     # Abuja connections (Federal Capital)
-    ("Abuja", "Lagos"): 500,
+    # Removed direct Lagos-Abuja connection to force proper routing
     ("Abuja", "Kano"): 400,
     ("Abuja", "Kaduna"): 200,
     ("Abuja", "Jos"): 300,
@@ -108,6 +108,7 @@ ROADS = {
     ("Jos", "Kaduna"): 150,
     
     # Ibadan connections (Southwest hub)
+    ("Ibadan", "Abuja"): 450,  # Realistic route through Ibadan
     ("Ibadan", "Ilorin"): 200,
     ("Ibadan", "Abeokuta"): 80,
     ("Ibadan", "Osogbo"): 100,
