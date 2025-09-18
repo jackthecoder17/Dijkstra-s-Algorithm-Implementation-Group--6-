@@ -108,8 +108,8 @@ ROADS = {
     ("Jos", "Kaduna"): 150,
     
     # Ibadan connections (Southwest hub)
-    ("Ibadan", "Abuja"): 450,  # Realistic route through Ibadan
-    ("Abuja", "Ibadan"): 450,  # Bidirectional connection
+    ("Ibadan", "Abuja"): 400,  # Shorter route to make it optimal
+    ("Abuja", "Ibadan"): 400,  # Bidirectional connection
     ("Ibadan", "Ilorin"): 200,
     ("Ibadan", "Abeokuta"): 80,
     ("Ibadan", "Osogbo"): 100,
