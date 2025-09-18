@@ -5,44 +5,275 @@ from http.server import BaseHTTPRequestHandler
 import json
 import urllib.parse
 
-# Sample Nigerian cities data
+# All 36 Nigerian states and their capitals with coordinates
 CITIES = {
-    "Lagos": {"state": "Lagos", "lat": 6.5244, "lng": 3.3792},
-    "Abuja": {"state": "FCT", "lat": 9.0765, "lng": 7.3986},
-    "Kano": {"state": "Kano", "lat": 12.0022, "lng": 8.5920},
-    "Ibadan": {"state": "Oyo", "lat": 7.3776, "lng": 3.9470},
-    "Port Harcourt": {"state": "Rivers", "lat": 4.8156, "lng": 7.0498},
-    "Benin City": {"state": "Edo", "lat": 6.3350, "lng": 5.6037},
-    "Kaduna": {"state": "Kaduna", "lat": 10.5200, "lng": 7.4383},
-    "Jos": {"state": "Plateau", "lat": 9.9167, "lng": 8.9000},
-    "Ilorin": {"state": "Kwara", "lat": 8.5000, "lng": 4.5500},
-    "Owerri": {"state": "Imo", "lat": 5.4833, "lng": 7.0333}
+    # State Capitals
+    "Abuja": {"state": "FCT", "lat": 9.0765, "lng": 7.3986, "is_capital": True},
+    "Lagos": {"state": "Lagos", "lat": 6.5244, "lng": 3.3792, "is_capital": True},
+    "Kano": {"state": "Kano", "lat": 12.0022, "lng": 8.5920, "is_capital": True},
+    "Ibadan": {"state": "Oyo", "lat": 7.3776, "lng": 3.9470, "is_capital": True},
+    "Port Harcourt": {"state": "Rivers", "lat": 4.8156, "lng": 7.0498, "is_capital": True},
+    "Benin City": {"state": "Edo", "lat": 6.3350, "lng": 5.6037, "is_capital": True},
+    "Kaduna": {"state": "Kaduna", "lat": 10.5200, "lng": 7.4383, "is_capital": True},
+    "Jos": {"state": "Plateau", "lat": 9.9167, "lng": 8.9000, "is_capital": True},
+    "Ilorin": {"state": "Kwara", "lat": 8.5000, "lng": 4.5500, "is_capital": True},
+    "Owerri": {"state": "Imo", "lat": 5.4833, "lng": 7.0333, "is_capital": True},
+    "Aba": {"state": "Abia", "lat": 5.1167, "lng": 7.3667, "is_capital": False},
+    "Umuahia": {"state": "Abia", "lat": 5.5333, "lng": 7.4833, "is_capital": True},
+    "Yola": {"state": "Adamawa", "lat": 9.2000, "lng": 12.4833, "is_capital": True},
+    "Uyo": {"state": "Akwa Ibom", "lat": 5.0333, "lng": 7.9167, "is_capital": True},
+    "Awka": {"state": "Anambra", "lat": 6.2000, "lng": 7.0833, "is_capital": True},
+    "Bauchi": {"state": "Bauchi", "lat": 10.3167, "lng": 9.8333, "is_capital": True},
+    "Yenagoa": {"state": "Bayelsa", "lat": 4.9167, "lng": 6.2500, "is_capital": True},
+    "Makurdi": {"state": "Benue", "lat": 7.7333, "lng": 8.5333, "is_capital": True},
+    "Maiduguri": {"state": "Borno", "lat": 11.8333, "lng": 13.1500, "is_capital": True},
+    "Calabar": {"state": "Cross River", "lat": 4.9500, "lng": 8.3167, "is_capital": True},
+    "Asaba": {"state": "Delta", "lat": 6.2000, "lng": 6.7333, "is_capital": True},
+    "Abakaliki": {"state": "Ebonyi", "lat": 6.3333, "lng": 8.1000, "is_capital": True},
+    "Benin City": {"state": "Edo", "lat": 6.3350, "lng": 5.6037, "is_capital": True},
+    "Ado Ekiti": {"state": "Ekiti", "lat": 7.6167, "lng": 5.2167, "is_capital": True},
+    "Enugu": {"state": "Enugu", "lat": 6.4500, "lng": 7.5000, "is_capital": True},
+    "Gombe": {"state": "Gombe", "lat": 10.2833, "lng": 11.1667, "is_capital": True},
+    "Owerri": {"state": "Imo", "lat": 5.4833, "lng": 7.0333, "is_capital": True},
+    "Dutse": {"state": "Jigawa", "lat": 11.7000, "lng": 9.3333, "is_capital": True},
+    "Kaduna": {"state": "Kaduna", "lat": 10.5200, "lng": 7.4383, "is_capital": True},
+    "Kano": {"state": "Kano", "lat": 12.0022, "lng": 8.5920, "is_capital": True},
+    "Katsina": {"state": "Katsina", "lat": 12.9833, "lng": 7.6167, "is_capital": True},
+    "Birnin Kebbi": {"state": "Kebbi", "lat": 12.4500, "lng": 4.2000, "is_capital": True},
+    "Lokoja": {"state": "Kogi", "lat": 7.8000, "lng": 6.7333, "is_capital": True},
+    "Ilorin": {"state": "Kwara", "lat": 8.5000, "lng": 4.5500, "is_capital": True},
+    "Lagos": {"state": "Lagos", "lat": 6.5244, "lng": 3.3792, "is_capital": True},
+    "Lafia": {"state": "Nasarawa", "lat": 8.5000, "lng": 8.5167, "is_capital": True},
+    "Minna": {"state": "Niger", "lat": 9.6167, "lng": 6.5500, "is_capital": True},
+    "Abeokuta": {"state": "Ogun", "lat": 7.1500, "lng": 3.3500, "is_capital": True},
+    "Akure": {"state": "Ondo", "lat": 7.2500, "lng": 5.2000, "is_capital": True},
+    "Osogbo": {"state": "Osun", "lat": 7.7667, "lng": 4.5667, "is_capital": True},
+    "Ibadan": {"state": "Oyo", "lat": 7.3776, "lng": 3.9470, "is_capital": True},
+    "Jos": {"state": "Plateau", "lat": 9.9167, "lng": 8.9000, "is_capital": True},
+    "Port Harcourt": {"state": "Rivers", "lat": 4.8156, "lng": 7.0498, "is_capital": True},
+    "Sokoto": {"state": "Sokoto", "lat": 13.0667, "lng": 5.2333, "is_capital": True},
+    "Jalingo": {"state": "Taraba", "lat": 8.8833, "lng": 11.3667, "is_capital": True},
+    "Damaturu": {"state": "Yobe", "lat": 11.7500, "lng": 11.9667, "is_capital": True},
+    "Gusau": {"state": "Zamfara", "lat": 12.1667, "lng": 6.6667, "is_capital": True},
+    
+    # Major cities (non-capitals)
+    "Abeokuta": {"state": "Ogun", "lat": 7.1500, "lng": 3.3500, "is_capital": True},
+    "Akure": {"state": "Ondo", "lat": 7.2500, "lng": 5.2000, "is_capital": True},
+    "Zaria": {"state": "Kaduna", "lat": 11.0833, "lng": 7.7000, "is_capital": False},
+    "Warri": {"state": "Delta", "lat": 5.5167, "lng": 5.7500, "is_capital": False},
+    "Onitsha": {"state": "Anambra", "lat": 6.1667, "lng": 6.7833, "is_capital": False},
+    "Kaduna": {"state": "Kaduna", "lat": 10.5200, "lng": 7.4383, "is_capital": True}
 }
 
-# Road connections with distances
+# Comprehensive road connections between all 36 state capitals
 ROADS = {
-    ("Lagos", "Abuja"): 500,
-    ("Lagos", "Ibadan"): 150,
-    ("Lagos", "Port Harcourt"): 600,
+    # Abuja connections (Federal Capital)
+    ("Abuja", "Lagos"): 500,
     ("Abuja", "Kano"): 400,
     ("Abuja", "Kaduna"): 200,
     ("Abuja", "Jos"): 300,
+    ("Abuja", "Ilorin"): 250,
+    ("Abuja", "Lokoja"): 150,
+    ("Abuja", "Minna"): 100,
+    ("Abuja", "Lafia"): 180,
+    
+    # Lagos connections (Commercial hub)
+    ("Lagos", "Ibadan"): 150,
+    ("Lagos", "Abeokuta"): 100,
+    ("Lagos", "Port Harcourt"): 600,
+    ("Lagos", "Benin City"): 300,
+    ("Lagos", "Akure"): 200,
+    ("Lagos", "Osogbo"): 180,
+    
+    # Kano connections (Northern hub)
     ("Kano", "Kaduna"): 200,
+    ("Kano", "Katsina"): 150,
+    ("Kano", "Dutse"): 100,
     ("Kano", "Maiduguri"): 300,
-    ("Ibadan", "Lagos"): 150,
-    ("Ibadan", "Ilorin"): 200,
-    ("Port Harcourt", "Owerri"): 120,
-    ("Port Harcourt", "Calabar"): 200,
-    ("Benin City", "Lagos"): 300,
-    ("Benin City", "Port Harcourt"): 200,
-    ("Kaduna", "Abuja"): 200,
-    ("Kaduna", "Kano"): 200,
+    ("Kano", "Sokoto"): 250,
+    ("Kano", "Birnin Kebbi"): 200,
+    ("Kano", "Gusau"): 180,
+    
+    # Kaduna connections (Central Northern hub)
+    ("Kaduna", "Jos"): 150,
+    ("Kaduna", "Zaria"): 30,
+    ("Kaduna", "Katsina"): 100,
+    ("Kaduna", "Birnin Kebbi"): 150,
+    ("Kaduna", "Gusau"): 120,
+    
+    # Jos connections (Plateau)
+    ("Jos", "Bauchi"): 100,
+    ("Jos", "Lafia"): 120,
     ("Jos", "Abuja"): 300,
     ("Jos", "Kaduna"): 150,
-    ("Ilorin", "Ibadan"): 200,
+    
+    # Ibadan connections (Southwest hub)
+    ("Ibadan", "Ilorin"): 200,
+    ("Ibadan", "Abeokuta"): 80,
+    ("Ibadan", "Osogbo"): 100,
+    ("Ibadan", "Akure"): 150,
+    ("Ibadan", "Ado Ekiti"): 120,
+    
+    # Port Harcourt connections (South-south hub)
+    ("Port Harcourt", "Owerri"): 120,
+    ("Port Harcourt", "Uyo"): 100,
+    ("Port Harcourt", "Calabar"): 200,
+    ("Port Harcourt", "Yenagoa"): 80,
+    ("Port Harcourt", "Asaba"): 150,
+    ("Port Harcourt", "Warri"): 100,
+    
+    # Owerri connections (Southeast)
+    ("Owerri", "Enugu"): 100,
+    ("Owerri", "Awka"): 80,
+    ("Owerri", "Umuahia"): 60,
+    ("Owerri", "Aba"): 50,
+    
+    # Enugu connections (Southeast hub)
+    ("Enugu", "Awka"): 100,
+    ("Enugu", "Abakaliki"): 80,
+    ("Enugu", "Makurdi"): 200,
+    ("Enugu", "Lafia"): 150,
+    
+    # Cross River connections
+    ("Calabar", "Uyo"): 100,
+    ("Calabar", "Yenagoa"): 120,
+    ("Calabar", "Port Harcourt"): 200,
+    
+    # Delta connections
+    ("Asaba", "Benin City"): 100,
+    ("Asaba", "Awka"): 80,
+    ("Asaba", "Warri"): 60,
+    ("Asaba", "Lokoja"): 200,
+    
+    # Edo connections
+    ("Benin City", "Asaba"): 100,
+    ("Benin City", "Akure"): 120,
+    ("Benin City", "Osogbo"): 150,
+    ("Benin City", "Lokoja"): 180,
+    
+    # Northern connections
+    ("Maiduguri", "Yola"): 200,
+    ("Maiduguri", "Gombe"): 150,
+    ("Maiduguri", "Bauchi"): 200,
+    ("Maiduguri", "Damaturu"): 100,
+    
+    ("Yola", "Gombe"): 100,
+    ("Yola", "Jalingo"): 150,
+    ("Yola", "Makurdi"): 250,
+    
+    ("Gombe", "Bauchi"): 100,
+    ("Gombe", "Jalingo"): 120,
+    ("Gombe", "Damaturu"): 80,
+    
+    ("Bauchi", "Jalingo"): 150,
+    ("Bauchi", "Jos"): 100,
+    ("Bauchi", "Kaduna"): 200,
+    
+    # Northwest connections
+    ("Sokoto", "Gusau"): 100,
+    ("Sokoto", "Birnin Kebbi"): 80,
+    ("Sokoto", "Katsina"): 150,
+    
+    ("Gusau", "Birnin Kebbi"): 60,
+    ("Gusau", "Kaduna"): 120,
+    ("Gusau", "Katsina"): 100,
+    
+    ("Birnin Kebbi", "Katsina"): 120,
+    ("Birnin Kebbi", "Kaduna"): 150,
+    
+    # Central connections
+    ("Lokoja", "Abuja"): 150,
+    ("Lokoja", "Minna"): 100,
+    ("Lokoja", "Makurdi"): 120,
+    ("Lokoja", "Asaba"): 200,
+    
+    ("Minna", "Abuja"): 100,
+    ("Minna", "Kaduna"): 150,
+    ("Minna", "Lokoja"): 100,
+    
+    ("Lafia", "Abuja"): 180,
+    ("Lafia", "Jos"): 120,
+    ("Lafia", "Makurdi"): 80,
+    ("Lafia", "Enugu"): 150,
+    
+    ("Makurdi", "Lafia"): 80,
+    ("Makurdi", "Enugu"): 200,
+    ("Makurdi", "Yola"): 250,
+    ("Makurdi", "Lokoja"): 120,
+    
+    # Southwest connections
     ("Ilorin", "Abuja"): 250,
-    ("Owerri", "Port Harcourt"): 120,
-    ("Owerri", "Enugu"): 100
+    ("Ilorin", "Lokoja"): 100,
+    ("Ilorin", "Osogbo"): 80,
+    ("Ilorin", "Ibadan"): 200,
+    
+    ("Abeokuta", "Lagos"): 100,
+    ("Abeokuta", "Ibadan"): 80,
+    ("Abeokuta", "Osogbo"): 120,
+    
+    ("Osogbo", "Ibadan"): 100,
+    ("Osogbo", "Ilorin"): 80,
+    ("Osogbo", "Abeokuta"): 120,
+    ("Osogbo", "Ado Ekiti"): 60,
+    
+    ("Akure", "Ibadan"): 150,
+    ("Akure", "Abeokuta"): 100,
+    ("Akure", "Ado Ekiti"): 80,
+    ("Akure", "Benin City"): 120,
+    
+    ("Ado Ekiti", "Osogbo"): 60,
+    ("Ado Ekiti", "Akure"): 80,
+    ("Ado Ekiti", "Ibadan"): 120,
+    
+    # Southeast connections
+    ("Awka", "Enugu"): 100,
+    ("Awka", "Asaba"): 80,
+    ("Awka", "Owerri"): 80,
+    ("Awka", "Onitsha"): 20,
+    
+    ("Umuahia", "Owerri"): 60,
+    ("Umuahia", "Aba"): 40,
+    ("Umuahia", "Enugu"): 100,
+    
+    ("Aba", "Owerri"): 50,
+    ("Aba", "Umuahia"): 40,
+    ("Aba", "Port Harcourt"): 50,
+    ("Aba", "Onitsha"): 80,
+    
+    ("Abakaliki", "Enugu"): 80,
+    ("Abakaliki", "Awka"): 100,
+    ("Abakaliki", "Makurdi"): 200,
+    
+    # South-south connections
+    ("Uyo", "Port Harcourt"): 100,
+    ("Uyo", "Calabar"): 100,
+    ("Uyo", "Yenagoa"): 80,
+    
+    ("Yenagoa", "Port Harcourt"): 80,
+    ("Yenagoa", "Uyo"): 80,
+    ("Yenagoa", "Warri"): 60,
+    ("Yenagoa", "Asaba"): 100,
+    
+    ("Warri", "Asaba"): 60,
+    ("Warri", "Yenagoa"): 60,
+    ("Warri", "Benin City"): 80,
+    ("Warri", "Port Harcourt"): 100,
+    
+    ("Onitsha", "Awka"): 20,
+    ("Onitsha", "Asaba"): 40,
+    ("Onitsha", "Aba"): 80,
+    ("Onitsha", "Enugu"): 100,
+    
+    # Northeast connections
+    ("Jalingo", "Yola"): 150,
+    ("Jalingo", "Gombe"): 120,
+    ("Jalingo", "Bauchi"): 150,
+    ("Jalingo", "Makurdi"): 180,
+    
+    ("Damaturu", "Maiduguri"): 100,
+    ("Damaturu", "Gombe"): 80,
+    ("Damaturu", "Bauchi"): 120,
+    ("Damaturu", "Jalingo"): 100
 }
 
 def calculate_distance(from_city, to_city):
@@ -95,7 +326,7 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             
-            cities_list = [{"name": name, "state": data["state"]} for name, data in CITIES.items()]
+            cities_list = [{"name": name, "state": data["state"], "is_capital": data["is_capital"]} for name, data in CITIES.items()]
             response = {"success": True, "cities": cities_list, "count": len(cities_list)}
             self.wfile.write(json.dumps(response).encode())
             
