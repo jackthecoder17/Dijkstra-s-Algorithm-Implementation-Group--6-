@@ -391,7 +391,7 @@ class handler(BaseHTTPRequestHandler):
                 },
                 "servers": [
                     {
-                        "url": "https://csc-320-backend-pkuco5ey5-jackthecoder17s-projects.vercel.app",
+                        "url": "https://csc-320-backend-8dg58vzc8-jackthecoder17s-projects.vercel.app",
                         "description": "Production server"
                     }
                 ],
