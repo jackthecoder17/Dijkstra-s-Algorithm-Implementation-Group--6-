@@ -109,6 +109,7 @@ ROADS = {
     
     # Ibadan connections (Southwest hub)
     ("Ibadan", "Abuja"): 450,  # Realistic route through Ibadan
+    ("Abuja", "Ibadan"): 450,  # Bidirectional connection
     ("Ibadan", "Ilorin"): 200,
     ("Ibadan", "Abeokuta"): 80,
     ("Ibadan", "Osogbo"): 100,
