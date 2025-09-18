@@ -276,6 +276,59 @@ ROADS = {
     ("Damaturu", "Jalingo"): 100
 }
 
+def dijkstra_algorithm(cities, roads, start, end):
+    """Dijkstra's algorithm implementation for shortest path finding."""
+    if start not in cities or end not in cities:
+        return None, None
+    
+    if start == end:
+        return 0, [start]
+    
+    # Initialize distances and previous nodes
+    distances = {city: float('inf') for city in cities}
+    previous = {city: None for city in cities}
+    distances[start] = 0
+    
+    # Priority queue (using a simple list for this implementation)
+    unvisited = set(cities.keys())
+    
+    while unvisited:
+        # Find the unvisited city with the smallest distance
+        current = min(unvisited, key=lambda city: distances[city])
+        
+        # If we've reached the end, we're done
+        if current == end:
+            break
+            
+        unvisited.remove(current)
+        
+        # Check all roads from current city
+        for (city1, city2), distance in roads.items():
+            if city1 == current and city2 in unvisited:
+                alt = distances[current] + distance
+                if alt < distances[city2]:
+                    distances[city2] = alt
+                    previous[city2] = current
+            elif city2 == current and city1 in unvisited:
+                alt = distances[current] + distance
+                if alt < distances[city1]:
+                    distances[city1] = alt
+                    previous[city1] = current
+    
+    # If no path found
+    if distances[end] == float('inf'):
+        return None, None
+    
+    # Reconstruct path
+    path = []
+    current = end
+    while current is not None:
+        path.append(current)
+        current = previous[current]
+    path.reverse()
+    
+    return distances[end], path
+
 def calculate_distance(from_city, to_city):
     """Calculate distance between two cities using Dijkstra's algorithm."""
     # Validate input cities
