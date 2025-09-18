@@ -129,7 +129,7 @@ class handler(BaseHTTPRequestHandler):
                             SwaggerUIBundle.presets.apis,
                             SwaggerUIBundle.presets.standalone
                         ],
-                        layout: "StandaloneLayout",
+                        layout: "BaseLayout",
                         deepLinking: true,
                         showExtensions: true,
                         showCommonExtensions: true
@@ -160,7 +160,7 @@ class handler(BaseHTTPRequestHandler):
                 },
                 "servers": [
                     {
-                        "url": "https://csc-320-backend-wddhwybi5-jackthecoder17s-projects.vercel.app",
+                        "url": "https://csc-320-backend-ghji25526-jackthecoder17s-projects.vercel.app",
                         "description": "Production server"
                     }
                 ],
