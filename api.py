@@ -105,108 +105,230 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             
-            docs_html = """
+            # Swagger UI HTML
+            swagger_html = """
             <!DOCTYPE html>
             <html>
             <head>
-                <title>🇳🇬 Nigerian City Distance Calculator API - Documentation</title>
+                <title>🇳🇬 Nigerian City Distance Calculator API - Swagger UI</title>
+                <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
                 <style>
-                    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-                    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                    h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
-                    h2 { color: #34495e; margin-top: 30px; }
-                    .endpoint { background: #ecf0f1; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #3498db; }
-                    .method { background: #27ae60; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; }
-                    .method.post { background: #e74c3c; }
-                    .url { font-family: monospace; background: #2c3e50; color: white; padding: 5px 10px; border-radius: 3px; }
-                    .example { background: #f8f9fa; padding: 10px; border-radius: 5px; border: 1px solid #dee2e6; }
-                    code { background: #f1f2f6; padding: 2px 5px; border-radius: 3px; }
-                    .response { background: #d4edda; padding: 10px; border-radius: 5px; border-left: 4px solid #28a745; }
+                    .swagger-ui .topbar { display: none; }
+                    .swagger-ui .info { margin: 20px 0; }
+                    .swagger-ui .info .title { color: #2c3e50; }
                 </style>
             </head>
             <body>
-                <div class="container">
-                    <h1>🇳🇬 Nigerian City Distance Calculator API</h1>
-                    <p><strong>Version:</strong> 1.0.0</p>
-                    <p><strong>Description:</strong> Calculate shortest distances between Nigerian cities using Dijkstra's Algorithm</p>
-                    
-                    <h2>📡 Endpoints</h2>
-                    
-                    <div class="endpoint">
-                        <h3><span class="method">GET</span> <span class="url">/</span></h3>
-                        <p><strong>Description:</strong> Get API information and available endpoints</p>
-                        <div class="example">
-                            <strong>Example:</strong><br>
-                            <code>GET https://csc-320-backend-erz3m03mq-jackthecoder17s-projects.vercel.app/</code>
-                        </div>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h3><span class="method">GET</span> <span class="url">/cities</span></h3>
-                        <p><strong>Description:</strong> Get list of all available Nigerian cities</p>
-                        <div class="example">
-                            <strong>Example:</strong><br>
-                            <code>GET https://csc-320-backend-erz3m03mq-jackthecoder17s-projects.vercel.app/cities</code>
-                        </div>
-                        <div class="response">
-                            <strong>Response:</strong><br>
-                            <code>{"success": true, "cities": [...], "count": 10}</code>
-                        </div>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h3><span class="method post">POST</span> <span class="url">/calculate-route</span></h3>
-                        <p><strong>Description:</strong> Calculate shortest distance between two cities</p>
-                        <div class="example">
-                            <strong>Request Body:</strong><br>
-                            <code>{"from_city": "Lagos", "to_city": "Abuja"}</code><br><br>
-                            <strong>Example:</strong><br>
-                            <code>POST https://csc-320-backend-erz3m03mq-jackthecoder17s-projects.vercel.app/calculate-route</code>
-                        </div>
-                        <div class="response">
-                            <strong>Response:</strong><br>
-                            <code>{"success": true, "distance": 500, "path": ["Lagos", "Abuja"]}</code>
-                        </div>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <h3><span class="method">GET</span> <span class="url">/calculate?from=Lagos&to=Abuja</span></h3>
-                        <p><strong>Description:</strong> Quick route calculation using query parameters</p>
-                        <div class="example">
-                            <strong>Example:</strong><br>
-                            <code>GET https://csc-320-backend-erz3m03mq-jackthecoder17s-projects.vercel.app/calculate?from=Lagos&to=Abuja</code>
-                        </div>
-                    </div>
-                    
-                    <h2>🏙️ Available Cities</h2>
-                    <ul>
-                        <li>Lagos (Lagos State)</li>
-                        <li>Abuja (FCT)</li>
-                        <li>Kano (Kano State)</li>
-                        <li>Ibadan (Oyo State)</li>
-                        <li>Port Harcourt (Rivers State)</li>
-                        <li>Benin City (Edo State)</li>
-                        <li>Kaduna (Kaduna State)</li>
-                        <li>Jos (Plateau State)</li>
-                        <li>Ilorin (Kwara State)</li>
-                        <li>Owerri (Imo State)</li>
-                    </ul>
-                    
-                    <h2>🧪 Test Your API</h2>
-                    <p>Try these examples in your browser or with curl:</p>
-                    <div class="example">
-                        <strong>Get Cities:</strong><br>
-                        <code>curl https://csc-320-backend-erz3m03mq-jackthecoder17s-projects.vercel.app/cities</code>
-                    </div>
-                    <div class="example">
-                        <strong>Calculate Route:</strong><br>
-                        <code>curl -X POST https://csc-320-backend-erz3m03mq-jackthecoder17s-projects.vercel.app/calculate-route -H "Content-Type: application/json" -d '{"from_city": "Lagos", "to_city": "Abuja"}'</code>
-                    </div>
-                </div>
+                <div id="swagger-ui"></div>
+                <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+                <script>
+                    const ui = SwaggerUIBundle({
+                        url: '/openapi.json',
+                        dom_id: '#swagger-ui',
+                        presets: [
+                            SwaggerUIBundle.presets.apis,
+                            SwaggerUIBundle.presets.standalone
+                        ],
+                        layout: "StandaloneLayout",
+                        deepLinking: true,
+                        showExtensions: true,
+                        showCommonExtensions: true
+                    });
+                </script>
             </body>
             </html>
             """
-            self.wfile.write(docs_html.encode())
+            self.wfile.write(swagger_html.encode())
+            
+        elif self.path == '/openapi.json':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            
+            # OpenAPI 3.0 specification
+            openapi_spec = {
+                "openapi": "3.0.0",
+                "info": {
+                    "title": "🇳🇬 Nigerian City Distance Calculator API",
+                    "description": "Calculate shortest distances between Nigerian cities using Dijkstra's Algorithm",
+                    "version": "1.0.0",
+                    "contact": {
+                        "name": "API Support",
+                        "email": "support@example.com"
+                    }
+                },
+                "servers": [
+                    {
+                        "url": "https://csc-320-backend-wddhwybi5-jackthecoder17s-projects.vercel.app",
+                        "description": "Production server"
+                    }
+                ],
+                "paths": {
+                    "/": {
+                        "get": {
+                            "summary": "Get API information",
+                            "description": "Returns API information and available endpoints",
+                            "responses": {
+                                "200": {
+                                    "description": "Successful response",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "message": {"type": "string"},
+                                                    "version": {"type": "string"},
+                                                    "description": {"type": "string"},
+                                                    "endpoints": {"type": "object"}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "/cities": {
+                        "get": {
+                            "summary": "Get all cities",
+                            "description": "Returns a list of all available Nigerian cities",
+                            "responses": {
+                                "200": {
+                                    "description": "Successful response",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "success": {"type": "boolean"},
+                                                    "cities": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "name": {"type": "string"},
+                                                                "state": {"type": "string"}
+                                                            }
+                                                        }
+                                                    },
+                                                    "count": {"type": "integer"}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "/calculate-route": {
+                        "post": {
+                            "summary": "Calculate route between cities",
+                            "description": "Calculate the shortest distance between two Nigerian cities",
+                            "requestBody": {
+                                "required": True,
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "from_city": {"type": "string", "example": "Lagos"},
+                                                "to_city": {"type": "string", "example": "Abuja"}
+                                            },
+                                            "required": ["from_city", "to_city"]
+                                        }
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "200": {
+                                    "description": "Successful calculation",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "success": {"type": "boolean"},
+                                                    "distance": {"type": "number"},
+                                                    "path": {
+                                                        "type": "array",
+                                                        "items": {"type": "string"}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "/calculate": {
+                        "get": {
+                            "summary": "Quick route calculation",
+                            "description": "Calculate route using query parameters",
+                            "parameters": [
+                                {
+                                    "name": "from",
+                                    "in": "query",
+                                    "required": True,
+                                    "schema": {"type": "string"},
+                                    "example": "Lagos"
+                                },
+                                {
+                                    "name": "to",
+                                    "in": "query",
+                                    "required": True,
+                                    "schema": {"type": "string"},
+                                    "example": "Abuja"
+                                }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "description": "Successful calculation",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "success": {"type": "boolean"},
+                                                    "distance": {"type": "number"},
+                                                    "path": {
+                                                        "type": "array",
+                                                        "items": {"type": "string"}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "components": {
+                    "schemas": {
+                        "City": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "state": {"type": "string"}
+                            }
+                        },
+                        "RouteResponse": {
+                            "type": "object",
+                            "properties": {
+                                "success": {"type": "boolean"},
+                                "distance": {"type": "number"},
+                                "path": {
+                                    "type": "array",
+                                    "items": {"type": "string"}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            self.wfile.write(json.dumps(openapi_spec).encode())
             
         elif self.path.startswith('/calculate'):
             self.send_response(200)
