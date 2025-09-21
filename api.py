@@ -1,5 +1,5 @@
 """
-Simple API for Nigerian City Distance Calculator - Frontend Optimized
+Simple API for Nigerian City Distance Calculator - Frontend Optimized (v2.0)
 """
 from http.server import BaseHTTPRequestHandler
 import json
