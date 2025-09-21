@@ -242,16 +242,26 @@ class handler(BaseHTTPRequestHandler):
             
         elif path == '/docs':
             # Serve Swagger UI
-            swagger_html = """
-<!DOCTYPE html>
-<html>
+            swagger_html = """<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nigerian City Distance Calculator API</title>
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
     <style>
-        html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
-        *, *:before, *:after { box-sizing: inherit; }
-        body { margin:0; background: #fafafa; }
+        html { 
+            box-sizing: border-box; 
+            overflow: -moz-scrollbars-vertical; 
+            overflow-y: scroll; 
+        }
+        *, *:before, *:after { 
+            box-sizing: inherit; 
+        }
+        body { 
+            margin: 0; 
+            background: #fafafa; 
+        }
     </style>
 </head>
 <body>
@@ -276,11 +286,13 @@ class handler(BaseHTTPRequestHandler):
         };
     </script>
 </body>
-</html>
-            """
-            self.send_header('Content-type', 'text/html')
+</html>"""
+            
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.send_header('Cache-Control', 'no-cache')
             self.end_headers()
-            self.wfile.write(swagger_html.encode())
+            self.wfile.write(swagger_html.encode('utf-8'))
             return
             
         elif path == '/openapi.json':
@@ -423,9 +435,12 @@ class handler(BaseHTTPRequestHandler):
                 }
             }
             
-            self.send_header('Content-type', 'application/json')
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Cache-Control', 'no-cache')
             self.end_headers()
-            self.wfile.write(json.dumps(openapi_spec, indent=2).encode())
+            self.wfile.write(json.dumps(openapi_spec, indent=2).encode('utf-8'))
             return
             
         else:
