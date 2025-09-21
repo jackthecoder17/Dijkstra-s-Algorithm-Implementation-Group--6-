@@ -206,14 +206,6 @@ class handler(BaseHTTPRequestHandler):
         path = parsed_path.path
         query_params = urllib.parse.parse_qs(parsed_path.query)
         
-        # Set CORS headers
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
-        
         if path == '/cities':
             # Return all cities
             cities_list = []
@@ -233,12 +225,32 @@ class handler(BaseHTTPRequestHandler):
                 "total": len(cities_list)
             }
             
+            # Set JSON headers
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+            self.wfile.write(json.dumps(response, indent=2).encode())
+            return
+            
         elif path == '/calculate':
             # Calculate route via GET
             from_city = query_params.get('from', [None])[0]
             to_city = query_params.get('to', [None])[0]
             
             response = calculate_distance(from_city, to_city)
+            
+            # Set JSON headers
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+            self.wfile.write(json.dumps(response, indent=2).encode())
+            return
             
         elif path == '/docs':
             # Serve Swagger UI
@@ -457,8 +469,16 @@ class handler(BaseHTTPRequestHandler):
                 },
                 "available_cities": list(CITIES.keys())
             }
-        
-        self.wfile.write(json.dumps(response, indent=2).encode())
+            
+            # Set JSON headers
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+            self.wfile.write(json.dumps(response, indent=2).encode())
+            return
     
     def do_POST(self):
         """Handle POST requests"""
